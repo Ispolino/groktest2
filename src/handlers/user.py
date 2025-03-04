@@ -8,7 +8,7 @@ router = Router(name=__name__)
 
 @router.message(CommandStart())
 async def command_start(message: Message):
-    add_user_to_db(message.from_user.id)
+    add_user_to_db(str(message.from_user.id))
 
 
 @router.message(Command("help"))
@@ -22,4 +22,7 @@ async def command_help(message: Message):
 @router.message(Command("users"))
 async def command_users(message: Message):
     users_list = get_users_list()
-    await message.reply(f"Список участников:\n{''.join(users_list)}")
+    text = "Список участников:\n"
+    for index, user in enumerate(users_list, 1):
+        text += f"User {index}: {user}"
+    await message.reply(text)
