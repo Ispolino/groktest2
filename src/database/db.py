@@ -21,7 +21,7 @@ def json_loads():
 
 def add_user_to_db(user_id: str):
     template = json_loads()
-    if user_id not in template["users"]:
+    if user_id not in set(template["users"]):
         template["users"].append(user_id)
         json_dump(template)
 
