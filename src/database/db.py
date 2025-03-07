@@ -1,7 +1,10 @@
 import psycopg2
-from src.config import settings
 from typing import Tuple
 from configparser import NoOptionError
+from src.config import settings
+from src.logs import getLogger
+
+logger = getLogger(__name__)
 
 
 class Database:
@@ -16,12 +19,14 @@ class Database:
             raise Exception(f"DB configuration error: {e}")
 
     def _connect(self):
-        return psycopg2.connect(
-            host=self.host,
-            user=self.user,
-            password=self.password,
-            database=self.database
-        )
+        try:
+            return psycopg2.connect(
+                host=self.host,
+                user=self.user,
+                password=self.password,
+                database=self.database)
+        except psycopg2.errors.OperationalError as e:
+            logger.error(f"connection error: {e}")
 
     def execute_query(self, query: str, params: Tuple = ()) -> None:
         """Выполняет запрос без возврата данных (INSERT, UPDATE, DELETE)."""

@@ -22,5 +22,5 @@ def add_user(user_id: int, username: str = None):
 
 def get_users_list():
     """Получение списка юзеров"""
-    return db.fetch_all("SELECT * FROM users")
+    return db.fetch_all("SELECT (id) FROM users")
 

@@ -24,5 +24,5 @@ async def command_users(message: Message):
     users_list = get_users_list()
     text = "Список участников:\n"
     for c, i in enumerate(users_list, 1):
-        text += f"User {c}: {i[0]} | {i[1]}\n"
+        text += f"User {c}: {i[0]}\n"
     await message.reply(text)
