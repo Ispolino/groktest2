@@ -1,31 +1,47 @@
-import json
+import psycopg2
+from src.config import settings
+from typing import Tuple
+from configparser import NoOptionError
 
 
-def json_dump(data: dict):
-    try:
-        with open("src/database/users.json", "w") as f:
-            json.dump(data, f)
+class Database:
+    def __init__(self):
+        try:
+            self.host = settings.db.host
+            self.user = settings.db.user
+            self.password = settings.db.password
+            self.database = settings.db.db_name
 
-    except Exception as e:
-        print(e)
+        except NoOptionError as e:
+            raise Exception(f"DB configuration error: {e}")
+
+    def _connect(self):
+        return psycopg2.connect(
+            host=self.host,
+            user=self.user,
+            password=self.password,
+            database=self.database
+        )
+
+    def execute_query(self, query: str, params: Tuple = ()) -> None:
+        """Выполняет запрос без возврата данных (INSERT, UPDATE, DELETE)."""
+        with self._connect() as con:
+            with con.cursor() as cur:
+                cur.execute(query, params)
+
+    def fetch_all(self, query: str, params: Tuple = ()) -> None:
+        """Выполняет SELECT запрос и возвращает записи"""
+        with self._connect() as con:
+            with con.cursor() as cur:
+                cur.execute(query, params)
+                return cur.fetchall()
+
+    def fetch_one(self, query: str, params: Tuple = ()) -> None:
+        """Выполняет SELECT запрос и возвращает запись"""
+        with self._connect() as con:
+            with con.cursor() as cur:
+                cur.execute(query, params)
+                return cur.fetchone()
 
 
-def json_loads():
-    try:
-        with open("src/database/users.json") as f:
-            content = f.read()
-            return json.loads(content)
-    except Exception as e:
-        print(e)
-
-
-def add_user_to_db(user_id: str):
-    template = json_loads()
-    if user_id not in set(template["users"]):
-        template["users"].append(user_id)
-        json_dump(template)
-
-
-def get_users_list():
-    template = json_loads()
-    return template["users"]
+db = Database()
