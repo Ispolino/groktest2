@@ -1,26 +1,28 @@
-from src.database.db import db
+from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
+from src.database.db import async_engine, AsyncSessionLocal
+from src.database.models import Base, UserModel
 
 
-def init_db():
+async def init_db():
     """Инициализация базы данных"""
-    db.execute_query("""
-    CREATE TABLE IF NOT EXISTS users(
-        id INT PRIMARY KEY,
-        username TEXT DEFAULT NULL
-    )
-    """)
+    async with async_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
 
-def add_user(user_id: int, username: str = None):
+async def add_user(user_id: int, username: str = None):
     """Добавление юзера в бд"""
-    db.execute_query("""
-    INSERT INTO users (id, username)
-    VALUES (%s, %s)
-    ON CONFLICT (id) DO NOTHING;
-    """, (user_id, username))
+    async with AsyncSessionLocal() as session:
+        async with session.begin():
+            stmt = insert(UserModel).values(id=user_id, username=username)
+            stmt = stmt.on_conflict_do_nothing(index_elements=['id'])
+            await session.execute(stmt)
 
 
-def get_users_list():
+async def get_users_list():
     """Получение списка юзеров"""
-    return db.fetch_all("SELECT (id) FROM users")
+    async with AsyncSessionLocal() as session:
+        stmt = select(UserModel)
+        result = await session.execute(stmt)
+        return result.scalars()
 

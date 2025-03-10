@@ -9,7 +9,7 @@ dp = Dispatcher()
 
 async def main():
     bot = Bot(token=settings.telegram.token)
-    init_db()
+    await init_db()
     await bot.delete_webhook(drop_pending_updates=True)
     dp.include_routers(router)
 
