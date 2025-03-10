@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import select
+from sqlalchemy import select, desc, asc
 from sqlalchemy.dialects.postgresql import insert
 from src.database.db import async_engine, AsyncSessionLocal
 from src.database.models import Base, User, Message
@@ -39,7 +39,7 @@ async def save_message(message_id: int, text: str, from_user_id: int, created_at
 async def get_user_messages(user_id: int):
     """Получения списка сообщений юзера"""
     async with AsyncSessionLocal() as session:
-        stmt = select(Message).where(Message.user_id == user_id)
+        stmt = select(Message).where(Message.user_id == user_id).order_by(desc(Message.created_at))
         result = await session.execute(stmt)
         return result.scalars()
 
